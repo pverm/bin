@@ -6,12 +6,30 @@ import argparse
 """
 to do:
 move/remove duplicates
-filter
+better filtering (option to ignore subdirs)
 more options to compare
-add shit to parser
+permission denied - pagefile.sys
 """
 
-def get_hash(file, algorithm='md5', readable=False, chunksize=512*128):
+def read_dir(dir=os.getcwd(), absolute=True):
+    """returns a list of all files in dir including subdirectories"""
+    filelist = []
+    for dirpath, dirnames, filenames in os.walk(dir):
+        if '.git' in dirnames:
+            dirnames.remove('.git')
+        for file in filenames:
+            filelist.append(os.path.join(dirpath, file) if absolute else file)
+    return filelist
+
+def get_compare_val(file, compare_method):
+    """dispatch method that returns compare value for a given file"""
+    if compare_method == "size":
+        return get_size(file)
+    elif compare_method == "hash":
+        return get_hash(file)
+
+def get_hash(file, algorithm='md5', readable=True, chunksize=512*128):
+    """returns hash of given file"""
     hash = hashlib.new(algorithm)
     with open(file, 'rb') as fin:
         chunk = fin.read(chunksize)
@@ -21,81 +39,78 @@ def get_hash(file, algorithm='md5', readable=False, chunksize=512*128):
     return hash.hexdigest() if readable else hash.digest()
 
 def get_size(file):
+    """returns size of given file"""
     return os.stat(file).st_size
-
-"""
-MD5_BIN = "md5.exe"
-def get_md5(file):
-    return subprocess.check_output([MD5_BIN, file]).split()[0]
-"""
-
-def read_dir(dir=os.getcwd(), absolute=True):
-    res = []
-    for dirpath, dirnames, filenames in os.walk(dir):
-        for file in filenames:
-            res.append(os.path.join(dirpath, file) if absolute else file)
-            
-    print("Found {} files.".format(len(res)))
-    return res
-
-def get_compareval(filelist, compare):
+    
+def compare_files(filelist, compare_method):
+    """Iterates over filelist and returns a dictionary where
+        key   -> compare value (computed based on compare_method)
+        alue -> list of files that have this compare value
+    """
     d = {}
-    total = len(filelist)
-    count = 1
+    count, total = 1, len(filelist)
     for file in filelist:
         skip = "~!" if count < total else ""
         print("{}\rProcessing file {}/{}\r".format(skip, count, total), end="")
-        if compare == "size":
-            d[file] = get_size(file)
-        elif compare == "hash":
-            d[file] = get_hash(file, 'md5', 'True')
+        compare_val = get_compare_val(file, compare_method)
+        d.setdefault(compare_val, []).append(file)
         count += 1
     print("")
     return d
 
-def filter_by_ext(filelist, ext="txt"):
+def filter_by_ext(filelist, ext):
+    """returns new list that only contains files with specific ext"""
     res = []
     for file in filelist:
         if file.endswith('.'+ext):
             res.append(file)
     return res
 
-def search_duplicates(d):
-    duplicates = {}
-    d_temp = {}
+def list_duplicates(dup_list):
+    """prints all duplicates in list"""
+    for dup in dup_list:
+        print(dup)
 
-    for file, compare_val in d.items():
-        if compare_val in d_temp:
-            d_temp[compare_val].append(file)
-        else:
-            d_temp[compare_val] = [file]
-
-    for compare_val, files in d_temp.items():
-        if len(d_temp[compare_val]) > 1:
-            duplicates[compare_val] = files
-
-    return duplicates
-
-def list_duplicates(d):
-    for compare_val, files in d.items():
-        for file in files:
-            print(compare_val, file)
-
-def remove_duplicates():
-    pass
-
-def get_duplicates(dir=os.getcwd(), compare_method="hash", ext=False, v=False):
+def get_duplicates(dir=os.getcwd(), compare_method="hash", ext=False):
+    """Returns a list of duplicates
+    
+    Attributes:
+        dir: searches for files in this directory
+        compare_method: method used to compute compare value
+        ext: only includes files with this extension
+    """
+    
     files = read_dir(dir)
     if ext:
         files = filter_by_ext(files, ext)
-    hashed_files = get_compareval(files, compare_method)
-    duplicate_files = search_duplicates(hashed_files)
-
-    if v:
-        list_duplicates(duplicate_files)
-
-    return duplicate_files
+        
+    print("Found {} files.".format(len(files)))
+        
+    comp = compare_files(files, compare_method).items()
+    return [Duplicate(val, files) for val, files in comp if len(files) > 1]
     
+    
+class Duplicate(object):
+
+    def __init__(self, compare_val, files):
+        self.val = compare_val
+        self.files = files
+        
+    def __str__(self):
+        str = self.val + " " + self.files[0]
+        for i in range(1,len(self.files)):
+            str += "\n " + " " * len(self.val) + self.files[i] 
+        return str
+        
+    def copy(self, dst):
+        pass
+        
+    def move(self, dst):
+        pass
+        
+    def delete(self):
+        pass
+        
     
 class Logger(object):
 
@@ -133,7 +148,10 @@ if __name__ == "__main__":
                         help="save output to file")
     parser.add_argument("-m", "--method", choices=["hash", "size"],
                         default="hash", help="method used to compare files")
+    parser.add_argument("-f:i", "--filter:include", metavar="EXTENSION", dest="include",
+                        help="only include specific filetypes", default="")
     args = parser.parse_args()
     
-    dup = get_duplicates(args.directory, args.method)
+    dup = get_duplicates(args.directory, args.method, args.include)
+    print("Found {} instances of duplicates.".format(len(dup)))
     list_duplicates(dup)
