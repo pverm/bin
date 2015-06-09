@@ -66,12 +66,7 @@ def filter_by_ext(filelist, ext):
         if file.endswith('.'+ext):
             res.append(file)
     return res
-
-def list_duplicates(dup_list):
-    """Prints all duplicates in list"""
-    for dup in dup_list:
-        print(dup)
-
+        
 def get_duplicates(dir=os.getcwd(), compare_method="hash", ext=False):
     """Returns a list of duplicates
 
@@ -89,7 +84,13 @@ def get_duplicates(dir=os.getcwd(), compare_method="hash", ext=False):
 
     comp = compare_files(files, compare_method).items()
     return [Duplicate(val, files, dir) for val, files in comp if len(files) > 1]
+    
 
+def action_on_duplicates(dup_list, action, param=None):
+    """Executes action on all duplicates in dup_list"""
+    for dup in dup_list:
+        dup.__getattribute__(action)(param)
+            
 
 class Duplicate(object):
     """Represents an instance of multiple duplicate files
@@ -106,10 +107,10 @@ class Duplicate(object):
         self.base = basedir
 
     def __str__(self):
-        str = self.val + " " + self.files[0]
+        res = str(self.val) + " " + self.files[0]
         for i in range(1,len(self.files)):
-            str += "\n " + " " * len(self.val) + self.files[i]
-        return str
+            res += "\n " + " " * len(str(self.val)) + self.files[i]
+        return res
 
     def copy(self, dst):
         for file in self.files:
@@ -119,10 +120,17 @@ class Duplicate(object):
             shutil.copy(file, path)
 
     def move(self, dst):
-        pass
+        for file in self.files:
+            path = file.replace(self.base, dst)
+            if not os.path.exists(os.path.dirname(path)):
+                os.makedirs(os.path.dirname(path))
+            shutil.move(file, path)
+            
+    def printout(self, arg=None):
+        print(self)
 
-    def delete(self):
-        pass
+    def remove(self, arg=None):
+        print("not implemented [got -rm '{}']".format(arg))
 
 
 class Logger(object):
@@ -153,10 +161,16 @@ class LoggerAction(argparse.Action):
         setattr(namespace, self.dest, values)
         sys.stdout = Logger(values)
 
+class DuplicateAction(argparse.Action):
+    """Sets flags for action that will be taken on duplicates"""
+    
+    def __call__(self, parser, namespace, values, option_string=None):
+        setattr(namespace, "action", self.dest)
+        if values:
+            setattr(namespace, self.dest, values)
 
 
 if __name__ == "__main__":
-
     parser = argparse.ArgumentParser(description='Find duplicate files.')
     parser.add_argument("directory")
     parser.add_argument("-l", "--log", metavar="FILE", action=LoggerAction,
@@ -165,14 +179,19 @@ if __name__ == "__main__":
                         default="hash", help="method used to compare files")
     parser.add_argument("-f:i", "--filter:include", metavar="EXTENSION", dest="include",
                         help="only include specific filetypes", default="")
-    parser.add_argument("-c", "--copy", metavar="PATH", default="",
-                        help="create copy of duplicates in PATH")
+                        
+    action_group = parser.add_mutually_exclusive_group()
+    action_group.add_argument("-c", "--copy", metavar="PATH", dest="copy",
+                        action=DuplicateAction, help="create copy of duplicates in PATH")
+    action_group.add_argument("-mv", "--move", metavar="PATH", dest="move",
+                        action=DuplicateAction, help="move duplicates to PATH")
+    action_group.add_argument("-rm", "--remove", nargs='?',
+                        action=DuplicateAction, help="remove duplicate files")
+                        
     args = parser.parse_args()
 
-    dup = get_duplicates(args.directory, args.method, args.include)
-    print("Found {} instances of duplicates.".format(len(dup)))
-    list_duplicates(dup)
-
-    if args.copy:
-        for d in dup:
-            d.copy(args.copy)
+    duplicates = get_duplicates(args.directory, args.method, args.include)
+    print("Found {} instances of duplicates.".format(len(duplicates)))
+    
+    action_on_duplicates(duplicates, "printout")
+    action_on_duplicates(duplicates, args.action, args.__getattribute__(args.action))
