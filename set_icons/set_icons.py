@@ -6,7 +6,7 @@ import time
 import win32api
 
 def create_desk_ini(path, icon):
-    """create new desktop.ini in folder and set icon"""
+    """create new desktop.ini in folder and set relative icon path"""
     content = ( '[.ShellClassInfo]\n'
                 'IconResource='+icon+',0\n'
                 '[ViewState]\n'
@@ -38,20 +38,23 @@ def update_folder_content(folder):
     temp_file.close()
     os.remove(temp_path)
 
+def set_icon(folder):
+    """set icon for folder"""
+    icon = get_icon(folder)
+    if icon:
+        desk_ini = os.path.join(folder, 'desktop.ini')
+        create_desk_ini(desk_ini, icon)
+        win32api.SetFileAttributes(folder, 17) #17 = Read-Only, Directory
+        icon_found[folder] = open(desk_ini, 'r')
 
 if __name__ == '__main__':
     rootfolder = sys.argv[1]
     icon_found = {} # key => folder, value => opened desktop.ini file object
+    set_icon(rootfolder)
     for dirpath, dirnames, filenames in os.walk(rootfolder):
         for dirname in dirnames:
-            folder = os.path.join(dirpath, dirname)
-            icon = get_icon(folder)
-            if icon:
-                desk_ini = os.path.join(folder, 'desktop.ini')
-                create_desk_ini(desk_ini, icon)
-                win32api.SetFileAttributes(folder, 17) #17 = Read-Only, Directory
-                icon_found[folder] = open(desk_ini, 'r')
-    time.sleep(60)
+            set_icon(os.path.join(dirpath, dirname))
+    time.sleep(6)
     for folder in icon_found:
         icon_found[folder].close()
         update_folder_content(folder)
