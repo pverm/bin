@@ -54,7 +54,7 @@ if __name__ == '__main__':
     for dirpath, dirnames, filenames in os.walk(rootfolder):
         for dirname in dirnames:
             set_icon(os.path.join(dirpath, dirname))
-    time.sleep(6)
+    time.sleep(60)
     for folder in icon_found:
         icon_found[folder].close()
         update_folder_content(folder)
