@@ -40,15 +40,19 @@ def update_folder_content(folder):
 
 
 if __name__ == '__main__':
-    folder = sys.argv[1]
-    desk_ini = os.path.join(folder, 'desktop.ini')
-    icon = get_icon(folder)
-    if icon:
-        create_desk_ini(desk_ini, icon)
-        win32api.SetFileAttributes(folder, 17) #17 = Read-Only, Directory
-        #lock desktop.ini and wait 60 seconds before updating folder content
-        flock = open(desk_ini, 'r')
-        time.sleep(60)
-        flock.close()
+    rootfolder = sys.argv[1]
+    icon_found = {} # key => folder, value => opened desktop.ini file object
+    for dirpath, dirnames, filenames in os.walk(rootfolder):
+        for dirname in dirnames:
+            folder = os.path.join(dirpath, dirname)
+            icon = get_icon(folder)
+            if icon:
+                desk_ini = os.path.join(folder, 'desktop.ini')
+                create_desk_ini(desk_ini, icon)
+                win32api.SetFileAttributes(folder, 17) #17 = Read-Only, Directory
+                icon_found[folder] = open(desk_ini, 'r')
+    time.sleep(60)
+    for folder in icon_found:
+        icon_found[folder].close()
         update_folder_content(folder)
     sys.exit(0)
