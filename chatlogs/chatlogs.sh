@@ -1,15 +1,14 @@
 #!/usr/bin/bash
 
-# remove old logs
-if [ -d "/home/pascal/sync/media/logs" ]; then
-  rm -r /home/pascal/sync/media/logs
-fi
+src="~/.config/hexchat/logs"
+dst="~/sync/media/logs"
+fixlogs="~/scripts/fix_logs.py"
 
-# make fresh copy of logs
-cp -R /home/pascal/.config/hexchat/logs/ /home/pascal/sync/media/
+# copy/update logs
+rsync -aq $src $dst
 
 # grant all permissions
-chmod -R 777 /home/pascal/sync/media/logs/
+chmod -R 777 $dst
 
 # remove carriage returns from dir/filenames
-python /home/pascal/scripts/fix_logs.py
+python $fixlogs
