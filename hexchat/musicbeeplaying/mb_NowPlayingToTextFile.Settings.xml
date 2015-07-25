@@ -3,13 +3,13 @@
   <multipleItemsSplitterChar1>;</multipleItemsSplitterChar1>
   <multipleItemsSplitterChar2>; </multipleItemsSplitterChar2>
   <encoding>utf-8</encoding>
-  <beginningText>&#xF;Currently playing: &#x3;04'</beginningText>
+  <beginningText>{white}Currently playing: {red}'</beginningText>
   <tag1Id>65</tag1Id>
-  <delimiterText1>'&#xF; [</delimiterText1>
+  <delimiterText1>'{white} [</delimiterText1>
   <tag2Id>16</tag2Id>
-  <delimiterText2>] :: &#x3;07</delimiterText2>
+  <delimiterText2>] :: {orange}</delimiterText2>
   <tag3Id>-2</tag3Id>
-  <delimiterText3>&#xF; :: </delimiterText3>
+  <delimiterText3>{white} :: </delimiterText3>
   <tag4Id>30</tag4Id>
   <delimiterText4> (</delimiterText4>
   <tag5Id>88</tag5Id>
