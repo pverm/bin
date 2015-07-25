@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<SavedSettingsType xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <multipleItemsSplitterChar1>;</multipleItemsSplitterChar1>
+  <multipleItemsSplitterChar2>; </multipleItemsSplitterChar2>
+  <encoding>utf-8</encoding>
+  <beginningText>&#xF;Currently playing: &#x3;04'</beginningText>
+  <tag1Id>65</tag1Id>
+  <delimiterText1>'&#xF; [</delimiterText1>
+  <tag2Id>16</tag2Id>
+  <delimiterText2>] :: &#x3;07</delimiterText2>
+  <tag3Id>-2</tag3Id>
+  <delimiterText3>&#xF; :: </delimiterText3>
+  <tag4Id>30</tag4Id>
+  <delimiterText4> (</delimiterText4>
+  <tag5Id>88</tag5Id>
+  <delimiterText5>) :: Played </delimiterText5>
+  <tag6Id>14</tag6Id>
+  <delimiterText6> times, last played </delimiterText6>
+  <tag7Id>13</tag7Id>
+  <delimiterText7>.</delimiterText7>
+  <tag8Id>-120</tag8Id>
+  <delimiterText8 />
+  <tag9Id>-120</tag9Id>
+  <delimiterText9 />
+  <tag10Id>-120</tag10Id>
+  <filePath>C:\Users\p_ver_000\AppData\Roaming\MusicBee\Tags.txt</filePath>
+  <imageFilePath>C:\Users\p_ver_000\AppData\Roaming\MusicBee\CoverArtwork.jpg</imageFilePath>
+  <artistImageFilePath>C:\Users\p_ver_000\AppData\Roaming\MusicBee\PrimaryBackDrop.jpg</artistImageFilePath>
+  <artistImageFilenamesFilePath>C:\Users\p_ver_000\AppData\Roaming\MusicBee\ArtworkBackDrops.txt</artistImageFilenamesFilePath>
+  <lyricsFilePath>C:\Users\p_ver_000\AppData\Roaming\MusicBee\Lyrics.txt</lyricsFilePath>
+</SavedSettingsType>
