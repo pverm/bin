@@ -1,0 +1,23 @@
+[godaddy]
+# your godaddy credentials
+username=exampleuser
+password=examplepass
+
+# your domain name
+domain=example.com
+
+# the A records you want to update, separated by spaces 
+dns_records=@ www blog
+
+# above settings will update:
+#   example.com
+#   www.example.com
+#   blog.example.com
+
+
+[log]
+# path to logfile
+file=godaddy-dyndns.log
+
+# set to debug for more detailed output
+level=info
