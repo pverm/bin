@@ -5,7 +5,7 @@ import sys
 # JSON structure:
 #  [{"time":"hh:mm:ss","nick":"user","msg":"bla"}]
 
-if __name__ == "__main__"":
+if __name__ == "__main__":
 	if len(sys.argv) < 3:
 		print("Transform chatlog to JSON")
 		print("  python chatlog-to-json.py <chat.log> <out.json>")
@@ -25,4 +25,3 @@ if __name__ == "__main__"":
 				
 	with open(sys.argv[2], 'w', encoding="utf-8") as fout:
 		json.dump(log, fout, indent=2)
-	
